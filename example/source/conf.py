@@ -28,6 +28,12 @@ offline_skin_js_path = r"default.js"
 offline_wavedrom_js_path = r"../wavedrom.js"
 #wavedrom_html_jsinline = True
 
+# This is a setting that becomes active when outputting to PNG or PDF
+# while using wavedrompy.
+# It allows you to set the file path for the font to be used. If not
+# set, wavedrompy's default font will be used.
+#wavedrom_font_path = "fontpath"
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

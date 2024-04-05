@@ -192,6 +192,7 @@ def setup(app):
     app.add_config_value('wavedrom_html_jsinline', True, 'html')
     app.add_config_value('wavedrom_cli', "npx wavedrom-cli", 'html')
     app.add_config_value('render_using_wavedrompy', False, 'html')
+    app.add_config_value('wavedrom_font_path', None, 'html')
     app.add_directive('wavedrom', WavedromDirective)
     app.connect('build-finished', build_finished)
     app.connect('builder-inited', builder_inited)

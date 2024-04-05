@@ -31,7 +31,37 @@ def determine_format(supported):
     return None
 
 
-def render_wavedrom_py(node, outpath, bname, image_format):
+def embed_font_in_svg(svg_data, font_family, font_path):
+    """
+    Embeds a given font into an SVG data string.
+
+    Parameters:
+    - svg_data (str): The original SVG data as a string.
+    - font_family (str): The name of the font family to be embedded.
+    - font_path (str): The path to the font file that will be embedded within the SVG.
+
+    Returns:
+    - str: The modified SVG data string with the embedded font.
+    """
+
+    style = (
+        f"<style type=\"text/css\">"
+        f"@font-face {{"
+        f"font-family: \"{font_family}\";"
+        f"src: url(\"{font_path}\");"
+        f"}}"
+        f"text {{"
+        f"font-family: \"{font_family}\";"
+        f"}}"
+        f"</style>"
+    )
+
+    svg_data_with_style = svg_data.replace('</svg>', f'{style}</svg>')
+
+    return svg_data_with_style
+
+
+def render_wavedrom_py(node, outpath, bname, image_format, font_path):
     """
     Render a wavedrom image
     """
@@ -51,16 +81,21 @@ def render_wavedrom_py(node, outpath, bname, image_format):
         svgout.saveas(fpath)
         return fname
 
+    if font_path is not None:
+        svgout_str = embed_font_in_svg(svgout.tostring(), "MyFont", font_path)
+    else:
+        svgout_str = svgout.tostring()
+
     if image_format == 'application/pdf':
         fname = "{}.{}".format(bname, "pdf")
         fpath = os.path.join(outpath, fname)
-        cairosvg.svg2pdf(svgout.tostring(), write_to=fpath)
+        cairosvg.svg2pdf(svgout_str, write_to=fpath)
         return fname
 
     if image_format == 'image/png':
         fname = "{}.{}".format(bname, "png")
         fpath = os.path.join(outpath, fname)
-        cairosvg.svg2png(svgout.tostring(), write_to=fpath)
+        cairosvg.svg2png(svgout_str, write_to=fpath)
         return fname
 
     raise SphinxError("No valid wavedrom conversion supplied")
@@ -78,9 +113,11 @@ def render_wavedrom_image(sphinx, node):
     bname = "wavedrom-{}".format(uuid4())
     outpath = os.path.join(sphinx.builder.outdir, sphinx.builder.imagedir)
 
+    font_path = sphinx.builder.config.wavedrom_font_path
+
     # Render the wavedrom image
     if sphinx.builder.config.render_using_wavedrompy:
-        imgname = render_wavedrom_py(node, outpath, bname, image_format)
+        imgname = render_wavedrom_py(node, outpath, bname, image_format, font_path)
     else:
         imgname = render_wavedrom_cli(sphinx, node, outpath, bname, image_format)
 
